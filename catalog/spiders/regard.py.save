@@ -1,0 +1,154 @@
+import scrapy
+import re
+import random
+from urllib.parse import urljoin
+from catalog import items
+
+class QuotesSpider(scrapy.Spider):
+    count = 1
+    res_dict = []
+    name = 'regard'
+
+    allowed_domains = ['webhook.site', 'regard.ru']
+    base_url_regard_ru = "https://www.regard.ru"
+    download_delay = random.uniform(3, 10)
+    proxy = {'proxy':'https://168.119.247.195:8888'}
+#    custom_settings = { "PLAYWRIGHT_LAUNCH_OPTIONS": { "proxy": { "server": "http://92.255.164.166:4145", "username": "", "password": "", }, }  }
+    def start_requests(self):
+#        url = 'https://webhook.site/6787d1fc-1879-4471-9626-c510537e72cd'
+        url = 'https://www.regard.ru/catalog/all'
+
+        yield scrapy.Request(url, meta=self.proxy, callback=self.parse)
+
+    def parse(self, response, **kwargs):
+        print(f"\n\nSTART def parse \n HELLO\n\n\n in url -- {response.url}\n")
+#        print(response.text)
+        cookie = response.headers #.getlist('Set-Cookie')
+        print(f'{cookie=}')
+#  со страницы с каталога получаем категории первого уровня. в res помещаем ссылки на категории 1 уровня
+        res = response.css(".CategoryLayout_categoryItem__3IwSp .Categories_wrap__3QSKW .CardCategory_wrap__25KAe::attr(href)").extract()
+#  перебираем массив с хрефами и добавляем главный домен в начало строки запроса.
+        for url in res: 
+            print(f'{url=}')
+            joinurl = urljoin(self.base_url_regard_ru, url)
+            print(f"{joinurl=}")
+            try:
+                yield scrapy.Request(joinurl, meta={"proxy": 'https://168.119.247.195:8888'}, callback=self.get_subcategories_2)
+            except Exception as e:
+                print(f"Exception {e}")
+#  получаем на вход страницы по ссылкам с первой страницы категорий
+    def get_subcategories_2(self, response, **kwargs):
+#        a = input("press enter to continue get_subcategories_2)")
+        print(f"\n\n\nSTART def get_subcategories_2\n\n in url -- {response.url}\n")
+        print(response.status)
+        res = response.css(".Scope_deskTiled__QRhew .Categories_wrap__3QSKW .CardCategory_wrap__25KAe::attr(href)").extract()
+        print(f'{res=} type=  {type(res)}')
+        res = self.add_domain_to_category_url(res, self.base_url_regard_ru)
+        print(f'{res=} type=  {type(res)}')
+        count = 0
+        try:
+            for url in res:
+                count+=1
+                print(f"for loop count = {count} \n********selfdict************ \n url = {url} \nHELLO")
+                self.res_dict.append(url)
+                item = items.QuoteItem()
+                item[f'urls_2_category'] = url
+                yield item
+
+        except Exception as e:
+            print(f"Exception {e}")
+
+        print('called def save to json')
+        for url in res:
+            try:
+                yield scrapy.Request(url, meta={"proxy": 'https://168.119.247.195:8888'}, callback=self.get_subcategories_3)
+            except Exception as e:
+                print(f"Exception get_subcategories_2 {e}")
+        print("end def get_subcategories_2")
+
+
+#  получаем на вход страницы по ссылкам со второй страницы категорий
+    def get_subcategories_3(self, response, **kwargs):
+#        a = input("press enter to continue get_subcategories_3)")
+        print(f"START def get_subcategories_3 in url -- {response.url}")
+        print(response.status)
+        try:
+            res = response.css(".Scope_deskTiled__QRhew .Categories_wrap__3QSKW .CardCategory_wrap__25KAe::attr(href)").extract()
+            print(f'{res=} type=  {type(res)}')
+        except Exception as e:
+            print("Not have subcategory. Goto --- def get_url_to_pages_with_products")
+            yield scrapy.Request(responce.url, meta={"proxy": 'https://168.119.247.195:8888'}, callback=self.get_url_to_pages_with_products)
+        if res:
+            print(f'{res=} type=  {type(res)}')
+            res = self.add_domain_to_category_url(res, self.base_url_regard_ru)
+            print(f'{res=} type=  {type(res)}')
+ 
+            count = 0
+            for url in res:
+                count+=1
+                print(f"for loop count = {count}\n url = {url} \n")
+                self.res_dict.append(url)
+                item = items.QuoteItem()
+                item[f'url_to_list_product_category'] = url
+                yield item
+            for url in res:
+                try:
+                    yield scrapy.Request(url, meta={"proxy": 'https://168.119.247.195:8888'}, callback=self.get_subcategories_3)
+                except Exception as e:
+                    print(f"Exception get_subcategories_2 {e}")
+        print("END def get_subcategories_3 in url -- {response.url}")
+ 
+
+    def get_url_to_pages_with_products(self, response, **kwargs):
+        print(f"\n\n\n\n!!!!!!!LIST OF PRODUCTS HERE !!!!\n\n\nSTART def get_url_to_pages_with_products for category -- {response.url}")
+        print(response.status)
+        print(response.url)
+        print("START def get_url_to_pages_with_products")
+
+#        a = input("press enter to continue)")
+
+#        res = response.css(".Scope_deskTiled__QRhew .Categories_wrap__3QSKW .CardCategory_wrap__25KAe::attr(href)").extract()
+#        print(f'{res=} type=  {type(res)}')
+
+
+    def add_domain_to_category_url(self, res, domain):
+        res_list = []
+        for url in res: 
+            print(f'{url=}')
+            joinurl = urljoin(self.base_url_regard_ru, url)
+            res_list.append(joinurl)
+        return res_list
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+'''
+
+
+    def save_to_json(self, res, item_name):
+        count = 0
+        for url in res:
+            count+=1
+            print(f"for loop count = {count}")
+            print(f'{self.res_dict=}')
+
+            print(f"url = {url}")
+            print("HELLO")
+            self.res_dict.append(url)
+
+            item = items.QuoteItem()
+            item[f'{item_name}'] = url
+        return item
+
+'''
+
