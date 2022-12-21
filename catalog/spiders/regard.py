@@ -56,7 +56,7 @@ class QuotesSpider(scrapy.Spider):
             joinurl = urljoin(self.base_url_regard_ru, url)
             print(f"{joinurl=}")
             try:
-                yield scrapy.Request(joinurl, meta={"proxy": 'https://168.119.247.195:8888'}, callback=self.get_subcategories_2)
+                yield scrapy.Request(joinurl, meta={"proxy": 'https://?.?.?.?:?'}, callback=self.get_subcategories_2)
             except Exception as e:
                 print(f"Exception {e}")
 #  получаем на вход страницы по ссылкам с первой страницы категорий
@@ -84,7 +84,7 @@ class QuotesSpider(scrapy.Spider):
         print('called def save to json')
         for url in res:
             try:
-                yield scrapy.Request(url, meta={"proxy": 'https://168.119.247.195:8888'}, callback=self.get_subcategories_3)
+                yield scrapy.Request(url, meta={"proxy": 'https://?.?.?.?:?'}, callback=self.get_subcategories_3)
             except Exception as e:
                 print(f"Exception get_subcategories_2 {e}")
         print("end def get_subcategories_2")
@@ -100,7 +100,7 @@ class QuotesSpider(scrapy.Spider):
             print(f'{res=} type=  {type(res)}')
         except Exception as e:
             print("Not have subcategory. Goto --- def get_url_to_pages_with_products")
-            yield scrapy.Request(responce.url, meta={"proxy": 'https://168.119.247.195:8888'}, callback=self.get_url_to_pages_with_products)
+            yield scrapy.Request(responce.url, meta={"proxy": 'https://?.?.?.?:?'}, callback=self.get_url_to_pages_with_products)
         if res:
             print(f'{res=} type=  {type(res)}')
             res = self.add_domain_to_category_url(res, self.base_url_regard_ru)
@@ -117,7 +117,7 @@ class QuotesSpider(scrapy.Spider):
                 yield item
             for url in res:
                 try:
-                    yield scrapy.Request(url, meta={"proxy": 'https://168.119.247.195:8888'}, callback=self.get_url_to_pages_with_products)
+                    yield scrapy.Request(url, meta={"proxy": 'https://?.?.?.?:?'}, callback=self.get_url_to_pages_with_products)
                 except Exception as e:
                     print(f"Exception get_subcategories_2 {e}")
         print("END def get_subcategories_3 in url -- {response.url}")
