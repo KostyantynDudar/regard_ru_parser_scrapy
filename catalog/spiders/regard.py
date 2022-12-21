@@ -19,7 +19,7 @@ class QuotesSpider(scrapy.Spider):
     allowed_domains = ['webhook.site', 'regard.ru']
     base_url_regard_ru = "https://www.regard.ru"
     download_delay = random.uniform(0.2, 0.5)
-    proxy = {'proxy':'https://168.119.247.195:8888'} #, 'playwright_page_coroutines': {"clickallbtns": PageMethod("evaluate", 'document.querySelectorAll(".CardListingModifications_showMore__D1Wl7").forEach(x=>x.click())'),  }}
+    proxy = {'proxy':'https://?.?.?.?:?'} #, 'playwright_page_coroutines': {"clickallbtns": PageMethod("evaluate", 'document.querySelectorAll(".CardListingModifications_showMore__D1Wl7").forEach(x=>x.click())'),  }}
 #    custom_settings = { "PLAYWRIGHT_LAUNCH_OPTIONS": { "proxy": { "server": "http://92.255.164.166:4145", "username": "", "password": "", }, }  }
 #   получаем из списка урлов катогий урлы и отправляем их в метод get_url_to_pages_with_products. 
 #    def start_requests(self):
